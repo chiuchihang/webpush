@@ -18,32 +18,22 @@ const SubscribeButton = () => {
       setError('Service Worker not supported.');
       return;
     }
-  
+
     if (!('PushManager' in window)) {
       setError('Push notifications are not supported.');
       return;
     }
-  
+
     try {
       const registration = await navigator.serviceWorker.ready;
-  
-      // Check if the user is already subscribed
-      const existingSubscription = await registration.pushManager.getSubscription();
-      if (existingSubscription) {
-        // Unsubscribe the user from the existing subscription
-        await existingSubscription.unsubscribe();
-        console.log('Unsubscribed from existing push notifications.');
-      }
-  
-      // Subscribe the user with the new applicationServerKey
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
       });
-  
+
       setSubscription(subscription);
-  
-      // Send the new subscription to the backend
+
+      // Send the subscription to the backend
       await fetch('/api/save-subscription', {
         method: 'POST',
         headers: {
@@ -61,7 +51,7 @@ const SubscribeButton = () => {
     <div className="text-center mt-5">
       {isIOS ? (
         <Alert variant="warning">
-          Push notifications are not supported on iOS.
+          Push notifications are not supported on iOS. Please subscribe to email notifications.
         </Alert>
       ) : (
         <>
